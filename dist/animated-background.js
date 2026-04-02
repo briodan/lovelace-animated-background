@@ -589,11 +589,9 @@ function renderBackgroundHTML() {
 }
 
 function urlIsVideo(url) {
-  if (url.slice(url.length - 3).toLowerCase() == "mp4" || url.slice(url.length - 4).toLowerCase() == "webm") {
-    return url.slice(url.length - 3).toLowerCase();
-  }
-  if (url.slice(url.length - 4).toLowerCase() == "webm") {
-    return url.slice(url.length - 4).toLowerCase();
+  var ext = url.split('.').pop().toLowerCase();
+  if (ext === "mp4" || ext === "webm") {
+    return ext;
   }
   return false;
 }
