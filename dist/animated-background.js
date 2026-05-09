@@ -23,6 +23,7 @@ let Previous_State;
 let Previous_Entity;
 let Previous_Url;
 let Previous_Config;
+let Previous_Last_Updated;
 
 function STATUS_MESSAGE(message, force) {
   if (!Debug_Mode) {
@@ -378,6 +379,9 @@ function renderBackgroundHTML() {
             }
           }
           Previous_State = current_state;
+          if (Haobj && Haobj.states[current_config.entity]) {
+            Previous_Last_Updated = Haobj.states[current_config.entity].last_updated;
+          }
         }
       }
       else {
@@ -740,7 +744,14 @@ function run() {
         if (Loaded) {
           if (current_config && current_config.entity) {
             var current_state = getEntityState(current_config.entity);
-            if (Previous_State != current_state) {
+            var entity_data = Haobj.states[current_config.entity];
+            var current_last_updated = entity_data ? entity_data.last_updated : null;
+            var state_changed = Previous_State != current_state;
+            var force_refresh = current_config.refresh_on_update && current_last_updated !== Previous_Last_Updated;
+            if (state_changed || force_refresh) {
+              if (force_refresh && !state_changed) {
+                Previous_State = null;
+              }
               clearMemes();
               renderBackgroundHTML();
             }
@@ -796,6 +807,7 @@ function restart() {
     if (Hui) {
       Previous_Entity = null;
       Previous_State = null;
+      Previous_Last_Updated = null;
       Loaded = false;
       View_Loaded = false;
       clearMemes();
