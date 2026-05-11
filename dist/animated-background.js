@@ -16,6 +16,7 @@ var Loaded = false;
 var View_Loaded = false;
 var Meme_Remover = null;
 var Meme_Count = 0;
+var Refresh_Timer = null;
 var Opacity = 99;
 
 //state tracking variables
@@ -88,6 +89,7 @@ var View_Observer = new MutationObserver(function (mutations) {
       }
       View_Loaded = false;
       clearMemes();
+      clearRefreshTimer();
       renderBackgroundHTML();
     }
   });
@@ -439,6 +441,16 @@ function renderBackgroundHTML() {
 
   Previous_Config = current_config;
 
+  if (current_config.refresh_interval && !Refresh_Timer) {
+    Refresh_Timer = setInterval(function() {
+      Previous_State = null;
+      Previous_Url = null;
+      renderBackgroundHTML();
+    }, current_config.refresh_interval * 60 * 1000);
+  } else if (!current_config.refresh_interval) {
+    clearRefreshTimer();
+  }
+
   var html_to_render;
   if (state_url != "" && Hui) {
     var bg = Hui.shadowRoot.getElementById("background-iframe");
@@ -683,6 +695,11 @@ function clearMemes() {
   Meme_Remover = null;
 }
 
+function clearRefreshTimer() {
+  clearInterval(Refresh_Timer);
+  Refresh_Timer = null;
+}
+
 function setDebugMode() {
   if (Animated_Config) {
     if (Animated_Config.debug) {
@@ -801,6 +818,7 @@ function run() {
 
 function restart() {
   cleanupDOM();
+  clearRefreshTimer();
   clearInterval(wait_interval);
   var wait_interval = setInterval(() => {
     getVars()
